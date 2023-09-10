@@ -1,34 +1,38 @@
-from rest_framework_mongoengine import serializers
+from rest_framework_mongoengine.serializers import DocumentSerializer, EmbeddedDocumentSerializer
 from core.models import User, Profile, Post, SocialMediaLink
 
 
-
-class SocialMediaLinkSerializer(serializers.EmbeddedDocumentSerializer):
+class SocialMediaLinkSerializer(EmbeddedDocumentSerializer):
     class Meta:
         model = SocialMediaLink
         fields = ('platform', 'url')
 
 
-class ProfileSerializer(serializers.DocumentSerializer):
+class ProfileSerializer(DocumentSerializer):
     social_media_links = SocialMediaLinkSerializer(many=True)
 
     class Meta:
         model = Profile
         fields = '__all__'
 
-
-class PostSerializer(serializers.DocumentSerializer):
+class PostSerializer(DocumentSerializer):
     class Meta:
         model = Post
         fields = '__all__'
 
 
-class UserSerializer(serializers.DocumentSerializer):
+class UserSerializer(DocumentSerializer):
+    profile = ProfileSerializer()
+
     class Meta:
         model = User
-        fields = ('username', 'email', 'password', 'profile')
+        fields = ('user_id', 'username', 'email', 'password', 'profile')
 
-    # Ensure the password field is write-only and hashed before saving
-    extra_kwargs = {
-        'password': {'write_only': True},
-    }
+    extra_kwargs = {'password': {'write_only': True}}
+
+    def create(self, validated_data):
+        profile_data = validated_data.pop('profile')
+        user = User.objects.create(**validated_data)
+        # TODO validate profile data before creating profile
+        user.create_profile(**profile_data)
+        return user
