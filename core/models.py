@@ -1,8 +1,20 @@
+import mongoengine
 import jwt
+import uuid
 from datetime import datetime, timedelta
 from mongoengine import Document, EmbeddedDocument, fields, CASCADE, ReferenceField
 from bson import ObjectId
-from staknet.settings import SECRET_KEY
+from staknet.settings import SECRET_KEY, JWT_EXPIRATION_MINUTE, ENCRYPT_ALGORITHM,  MONGODB_HOST, MONGODB_PORT, MONGODB_USERNAME, MONGODB_PASSWORD, MONGODB
+
+
+mongoengine.connect(
+    db=MONGODB,
+    host=MONGODB_HOST,
+    port=MONGODB_PORT,
+    username=MONGODB_USERNAME,
+    password=MONGODB_PASSWORD,
+    alias='default'
+)
 
 
 class SocialMediaLink(EmbeddedDocument):
@@ -61,6 +73,8 @@ class Post(Document):
 
 
 class User(Document):
+    user_id = fields.UUIDField(
+        binary=False, default=uuid.uuid4)
     username = fields.StringField(max_length=100, unique=True, required=True)
     email = fields.EmailField(unique=True, required=True)
     password = fields.StringField(required=True)  # Store hashed password
@@ -96,13 +110,14 @@ class User(Document):
             'user_id': str(self.id),
             'exp': datetime.utcnow() + timedelta(days=1)  # Token expiration time
         }
-        token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')
+        token = jwt.encode(payload, SECRET_KEY, algorithm=ENCRYPT_ALGORITHM)
         return token
 
     @staticmethod
     def decode_jwt_token(token):
         try:
-            payload = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
+            payload = jwt.decode(
+                token, SECRET_KEY, algorithms=ENCRYPT_ALGORITHM)
             user_id = payload['user_id']
             return User.objects(id=ObjectId(user_id)).first()
         except jwt.ExpiredSignatureError:
@@ -114,3 +129,26 @@ class User(Document):
 class Connection(Document):
     user = ReferenceField(User, reverse_delete_rule=CASCADE)
     connected_user = ReferenceField(User, reverse_delete_rule=CASCADE)
+
+
+class AuthSession(Document):
+    token = fields.StringField(required=True, unique=True)
+    user = ReferenceField('User', required=True)
+    created_at = fields.DateTimeField(default=datetime.utcnow)
+    expires_at = fields.DateTimeField(required=True)
+
+    meta = {
+        'collection': 'jwt_sessions'
+    }
+
+    @classmethod
+    def create_session(cls, token, user, expiration_time_minutes=JWT_EXPIRATION_MINUTE):
+        # TODO check if session already exists and update it
+        expires_at = datetime.utcnow() + timedelta(minutes=expiration_time_minutes)
+        session = cls(token=token, user=user, expires_at=expires_at)
+        session.save()
+        return session
+
+    @classmethod
+    def find_by_token(cls, token):
+        return cls.objects(token=token, expires_at__gte=datetime.utcnow()).first()
