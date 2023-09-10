@@ -61,13 +61,29 @@ TEMPLATES = [
 WSGI_APPLICATION = 'staknet.wsgi.application'
 
 # Mongoengine connection
+MONGODB = env("MONGO_INITDB_DATABASE")
+MONGODB_HOST = env("MONGO_INITDB_HOST")
+MONGODB_PORT = int(env("MONGO_INITDB_PORT"))
+MONGODB_USERNAME = env("MONGO_INITDB_ROOT_USERNAME")
+MONGODB_PASSWORD = env("MONGO_INITDB_ROOT_PASSWORD")
+
 mongoengine.connect(
-    db=env("MONGO_INITDB_DATABASE"),
-    host=env("MONGO_INITDB_HOST"),
-    port=int(env("MONGO_INITDB_PORT")),
-    username=env("MONGO_INITDB_ROOT_USERNAME"),
-    password=env("MONGO_INITDB_ROOT_PASSWORD"),
+    db=MONGODB,
+    host=MONGODB_HOST,
+    port=MONGODB_PORT,
+    username=MONGODB_USERNAME,
+    password=MONGODB_PASSWORD,
+    alias='default',
 )
+
+# mongoengine.connect(
+#     db=env("MONGO_INITDB_DATABASE"),
+#     host=env("MONGO_INITDB_HOST"),
+#     port=int(env("MONGO_INITDB_PORT")),
+#     username=env("MONGO_INITDB_ROOT_USERNAME"),
+#     password=env("MONGO_INITDB_ROOT_PASSWORD"),
+#     alias='stakDB'
+# )
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -109,3 +125,14 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.TokenAuthentication',
+        'core.permissions.AuthPermission'
+    ),
+}
+
+# JWT settings
+JWT_EXPIRATION_MINUTE = 60
+ENCRYPT_ALGORITHM = 'HS256'
