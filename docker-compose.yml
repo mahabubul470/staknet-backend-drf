@@ -3,10 +3,10 @@ services:
   mongo:
     image: mongo:5.0
     container_name: mongo
-    env_file: .env 
+    env_file: .env
     restart: unless-stopped
     ports:
-      - "27017:27017"
+      - "27018:27017"
     volumes:
       - ./database/db:/data/db
       - ./database/dev.archive:/Databases/dev.archive
@@ -14,7 +14,7 @@ services:
   mongo-express:
     image: mongo-express
     container_name: mexpress
-    env_file: .env 
+    env_file: .env
     restart: unless-stopped
     ports:
-      - "8081:8081"
+      - "8082:8081"
