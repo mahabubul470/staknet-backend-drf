@@ -4,12 +4,17 @@ from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
 from django.contrib.auth.hashers import make_password, check_password
 from core.models import User, AuthSession
-from core.serializers import UserSerializer
-from core.permissions import AuthPermission
+from core.serializers import UserSerializer, ProfileSerializer
+from core.auth import AuthPermission, TokenAuthentication
 
 
 class UserApiView(APIView):
     permission_classes = [AllowAny]
+
+    def get(self, request):
+        users = User.objects.all()
+        serializer = UserSerializer(users, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
         serializer = UserSerializer(data=request.data)
@@ -20,14 +25,10 @@ class UserApiView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def get(self, request):
-        users = User.objects.all()
-        serializer = UserSerializer(users, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
 
 class AuthApiView(APIView):
     permission_classes = [AllowAny]
+    authentication_classes = []
 
     def post(self, request):
         username = request.data.get("username")
@@ -56,17 +57,16 @@ class AuthApiView(APIView):
 
 class ProfileApiView(APIView):
     permission_classes = [AuthPermission]
+    authentication_classes = [TokenAuthentication]
 
     def get(self, request):
-        serializer = UserSerializer(request.user)
+        user = User.objects.get(username=request.user.username)
+        serializer = UserSerializer(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
-    
-    def put(self, request):
-        user = request.user
-        serializer = UserSerializer(user, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({"detail": "Profile updated successfully."}, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
- 
+    def put(self, request):
+        serialer = UserSerializer(data=request.data)
+        if serialer.is_valid():
+            serialer.update(request.user, validated_data=request.data)
+            return Response(serialer.data, status=status.HTTP_200_OK)
+        return Response(serialer.errors, status=status.HTTP_400_BAD_REQUEST)
