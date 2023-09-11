@@ -38,6 +38,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
 ]
 
 ROOT_URLCONF = 'staknet.urls'
@@ -128,10 +129,15 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.TokenAuthentication',
-        'core.permissions.AuthPermission'
+        'core.auth.TokenAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'core.auth.AuthPermission'
     ),
 }
+
 
 # JWT settings
 JWT_EXPIRATION_MINUTE = 60
