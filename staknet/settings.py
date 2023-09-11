@@ -140,5 +140,5 @@ REST_FRAMEWORK = {
 
 
 # JWT settings
-JWT_EXPIRATION_MINUTE = 60
-ENCRYPT_ALGORITHM = 'HS256'
+JWT_EXPIRATION_MINUTE = 60  # JWT token expiration time in minutes
+ENCRYPT_ALGORITHM = 'HS256'  # JWT token encryption algorithm

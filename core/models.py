@@ -1,20 +1,9 @@
 import mongoengine
 import jwt
-import uuid
 from datetime import datetime, timedelta
 from mongoengine import Document, EmbeddedDocument, fields, CASCADE, ReferenceField
 from bson import ObjectId
-from staknet.settings import SECRET_KEY, JWT_EXPIRATION_MINUTE, ENCRYPT_ALGORITHM,  MONGODB_HOST, MONGODB_PORT, MONGODB_USERNAME, MONGODB_PASSWORD, MONGODB
-
-
-mongoengine.connect(
-    db=MONGODB,
-    host=MONGODB_HOST,
-    port=MONGODB_PORT,
-    username=MONGODB_USERNAME,
-    password=MONGODB_PASSWORD,
-    alias='default'
-)
+from staknet.settings import SECRET_KEY, JWT_EXPIRATION_MINUTE, ENCRYPT_ALGORITHM
 
 
 class SocialMediaLink(EmbeddedDocument):
@@ -33,22 +22,6 @@ class Profile(Document):
         post.save()
         return post
 
-    def like_post(self, post_id):
-        post = Post.objects(id=post_id).first()
-        if post and self.user not in post.likes:
-            post.likes.append(self.user)
-            post.save()
-            return post
-        return None
-
-    def comment_on_post(self, post_id, text):
-        post = Post.objects(id=post_id).first()
-        if post:
-            comment = {'user': self.user, 'text': text}
-            post.comments.append(comment)
-            post.save()
-            return comment
-
 
 class Post(Document):
     user = ReferenceField('User')
@@ -66,10 +39,6 @@ class Post(Document):
         comment = {'user': user, 'text': text}
         self.comments.append(comment)
         self.save()
-
-    @classmethod
-    def search_posts_by_keyword(cls, keyword):
-        return cls.objects(text__icontains=keyword)
 
 
 class User(Document):
