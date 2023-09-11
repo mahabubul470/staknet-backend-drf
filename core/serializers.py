@@ -7,11 +7,6 @@ class SocialMediaLinkSerializer(EmbeddedDocumentSerializer):
         model = SocialMediaLink
         fields = ('platform', 'url')
 
-    def update(self, instance, validated_data):
-        print('*****************************************************')
-        print(instance)
-
-
 class ProfileSerializer(DocumentSerializer):
     social_media_links = SocialMediaLinkSerializer(many=True)
 
