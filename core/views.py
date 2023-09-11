@@ -10,6 +10,7 @@ from core.auth import AuthPermission, TokenAuthentication
 
 class UserApiView(APIView):
     permission_classes = [AllowAny]
+    authentication_classes = []
 
     def get(self, request):
         users = User.objects.all()
@@ -65,8 +66,13 @@ class ProfileApiView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def put(self, request):
-        serialer = UserSerializer(data=request.data)
-        if serialer.is_valid():
-            serialer.update(request.user, validated_data=request.data)
-            return Response(serialer.data, status=status.HTTP_200_OK)
-        return Response(serialer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer = UserSerializer(data=request.data)
+        user = User.objects.get(username=request.user.username)
+        if serializer.is_valid():
+            serializer.update(instance=user,
+                              validated_data=serializer.validated_data)
+            return Response(serializer.validated_data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+

@@ -73,8 +73,6 @@ class Post(Document):
 
 
 class User(Document):
-    user_id = fields.UUIDField(
-        binary=False, default=uuid.uuid4)
     username = fields.StringField(max_length=100, unique=True, required=True)
     email = fields.EmailField(unique=True, required=True)
     password = fields.StringField(required=True)  # Store hashed password
@@ -90,10 +88,8 @@ class User(Document):
 
     def update_profile(self, profile_picture, bio, social_media_links):
         if self.profile:
-            self.profile.profile_picture = profile_picture
-            self.profile.bio = bio
-            self.profile.social_media_links = social_media_links
-            self.profile.save()
+            self.create_profile(
+                profile_picture, bio, social_media_links)
             return self.profile
         return None
 
@@ -119,7 +115,7 @@ class User(Document):
             payload = jwt.decode(
                 token, SECRET_KEY, algorithms=ENCRYPT_ALGORITHM)
             user_id = payload['user_id']
-            return User.objects(id=ObjectId(user_id)).first()
+            return User.objects(id=ObjectId(id)).first()
         except jwt.ExpiredSignatureError:
             return None  # Token has expired
         except jwt.DecodeError:
