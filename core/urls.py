@@ -2,7 +2,7 @@ import core.views as views
 from django.urls import path
 
 urlpatterns = [
-    path('user/', views.UserApiView.as_view(), name='user-registration'),
+    path('users/', views.UserApiView.as_view(), name='users'),
     path('login/', views.AuthApiView.as_view(), name='user-login'),
     path('profile/', views.ProfileApiView.as_view(), name='user-profile'),
     path('posts/', views.PostCreateView.as_view(), name='post-create'),
