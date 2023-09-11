@@ -7,6 +7,10 @@ class SocialMediaLinkSerializer(EmbeddedDocumentSerializer):
         model = SocialMediaLink
         fields = ('platform', 'url')
 
+    def update(self, instance, validated_data):
+        print('*****************************************************')
+        print(instance)
+
 
 class ProfileSerializer(DocumentSerializer):
     social_media_links = SocialMediaLinkSerializer(many=True)
@@ -14,6 +18,7 @@ class ProfileSerializer(DocumentSerializer):
     class Meta:
         model = Profile
         fields = '__all__'
+
 
 class PostSerializer(DocumentSerializer):
     class Meta:
@@ -36,3 +41,11 @@ class UserSerializer(DocumentSerializer):
         # TODO validate profile data before creating profile
         user.create_profile(**profile_data)
         return user
+
+    def update(self, instance, validated_data):
+        # profile_data = validated_data.pop('profile')
+        # instance.username = validated_data.get('username', instance.username)
+        # instance.email = validated_data.get('email', instance.email)
+        # instance.update_profile(**profile_data)
+        # instance.save()
+        return validated_data
