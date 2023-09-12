@@ -142,3 +142,24 @@ REST_FRAMEWORK = {
 # JWT settings
 JWT_EXPIRATION_MINUTE = 60  # JWT token expiration time in minutes
 ENCRYPT_ALGORITHM = 'HS256'  # JWT token encryption algorithm
+
+
+# TODO : move variables to env
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "file": {
+            "level": "DEBUG",
+            "class": "logging.FileHandler",
+            "filename": "staknet.log",
+        },
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["file"],
+            "level": "DEBUG",
+            "propagate": True,
+        },
+    },
+}
