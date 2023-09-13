@@ -144,21 +144,20 @@ JWT_EXPIRATION_MINUTE = 60  # JWT token expiration time in minutes
 ENCRYPT_ALGORITHM = 'HS256'  # JWT token encryption algorithm
 
 
-# TODO : move variables to env
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
     "handlers": {
         "file": {
-            "level": "DEBUG",
+            "level": env("LOG_LEVEL"),
             "class": "logging.FileHandler",
-            "filename": "staknet.log",
+            "filename": env("LOG_FILE_PATH"),
         },
     },
     "loggers": {
         "django": {
             "handlers": ["file"],
-            "level": "DEBUG",
+            "level": env("LOG_LEVEL"),
             "propagate": True,
         },
     },
