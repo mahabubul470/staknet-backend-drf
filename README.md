@@ -39,4 +39,6 @@ docker compose up -d --build
 python manage.py runserver
 ```
 
+> :notebook: **Note:** You dont need to migrate anything as using nosql for the primary database and mongoengine ODM insted of dajango ORM and PyMongo 
 
+> :notebook: **Note:** No django admin, No Authenticaton backend from django/drf, Custom Token Authentication (JTW) Implemented.
